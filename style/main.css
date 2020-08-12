@@ -26,6 +26,8 @@ body {
 }
 
 header {
+  position: fixed;
+  top: 0em;
   width: 100%;
 }
 
@@ -75,6 +77,8 @@ footer {
   display: flex;
   justify-content: space-evenly;
   background-color: #2296f3;
+  position: fixed;
+  bottom: 0em;
 }
 
 a {
