@@ -42,11 +42,11 @@ limitations under the License.
 <body>
   <header>
     <ul class="navbar">
-      <li><a href="/"><img src="/images/icon/" alt="На "></a></li>
+      <li><a href="/"><img src="/images/icon/favicon-16x16.png" alt="На "></a></li>
       <li><a href="#">World</a></li>
       <li><a href="#">Tech</a></li>
       <li><a href="#">Contact</a></li>
-      <li class="profile-icon"><img src="/images/icon/icon.svg" alt="profile icon" /></li>
+      <li class="profile-icon"><img src="/images/icon/favicon-16x16.png" alt="profile icon" /></li>
     </ul>
   </header>
 
@@ -89,7 +89,7 @@ limitations under the License.
       </div>
     </section>
   </article>
-
+  https://firebase.google.com/docs/cloud-messaging/js/receive
   <footer>
     <div style="color: rgba(0, 0, 0, 0.87); background-color: rgb(255, 255, 255); transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; 
     box-sizing: border-box; font-family: Roboto, sans-serif;
@@ -114,8 +114,14 @@ limitations under the License.
   <!-- Временное размещение begin -->
   <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 
+ <!--
   <script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-app.js"></script>
+  <script>importScripts('https://www.gstatic.com/firebasejs/7.17.2/firebase-messaging.js');</script>
+  -->
+  <script src="/js/firebase-messaging-sw.js"></script>
   <script>
+    importScripts('https://www.gstatic.com/firebasejs/7.17.2/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/7.17.2/firebase-messaging.js');
     // Your web app's Firebase configuration
     var firebaseConfig = {
       apiKey: "AIzaSyD9C3_k3-8xoBOZCK0v_XUy3zguv_yQ5Ik",
@@ -128,11 +134,64 @@ limitations under the License.
     };
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
+    const messaging = firebase.messaging();
+// Handle incoming messages. Called when:
+// - a message is received while the app has focus
+// - the user clicks on an app notification created by a service worker
+//   `messaging.setBackgroundMessageHandler` handler.
+messaging.onMessage((payload) => {
+  console.log('Message received. ', payload);
+  // ...
+});
+messaging.setBackgroundMessageHandler(function(payload) {
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  // Customize notification here
+  const notificationTitle = 'Background Message Title';
+  const notificationOptions = {
+    body: 'Background Message body.',
+    icon: '/firebase-logo.png'
+  };
 
+  return self.registration.showNotification(notificationTitle,
+    notificationOptions);
+});
 
-
+// Get Instance ID token. Initially this makes a network call, once retrieved
+// subsequent calls to getToken will return from cache.
+messaging.getToken().then((currentToken) => {
+  if (currentToken) {
+    sendTokenToServer(currentToken);
+    updateUIForPushEnabled(currentToken);
+  } else {
+    // Show permission request.
+    console.log('No Instance ID token available. Request permission to generate one.');
+    // Show permission UI.
+    updateUIForPushPermissionRequired();
+    setTokenSentToServer(false);
+  }
+}).catch((err) => {
+  console.log('An error occurred while retrieving token. ', err);
+  showToken('Error retrieving Instance ID token. ', err);
+  setTokenSentToServer(false);
+});
+// Callback fired if Instance ID token is updated.
+messaging.onTokenRefresh(() => {
+  messaging.getToken().then((refreshedToken) => {
+    console.log('Token refreshed.');
+    // Indicate that the new Instance ID token has not yet been sent to the
+    // app server.
+    setTokenSentToServer(false);
+    // Send Instance ID token to app server.
+    sendTokenToServer(refreshedToken);
+    // ...
+  }).catch((err) => {
+    console.log('Unable to retrieve refreshed token ', err);
+    showToken('Unable to retrieve refreshed token ', err);
+  });
+});
     
   </script>
+ 
 <!-- Временное размещение end -->
   
   <script>
