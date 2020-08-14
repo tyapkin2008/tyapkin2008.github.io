@@ -143,7 +143,7 @@ messaging.onMessage((payload) => {
   console.log('Message received. ', payload);
   // ...
 });
-messaging.setBackgroundMessageHandler(function(payload) {
+/* messaging.setBackgroundMessageHandler(function(payload) {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
   // Customize notification here
   const notificationTitle = 'Background Message Title';
@@ -155,6 +155,7 @@ messaging.setBackgroundMessageHandler(function(payload) {
   return self.registration.showNotification(notificationTitle,
     notificationOptions);
 });
+*/
 
 // Get Instance ID token. Initially this makes a network call, once retrieved
 // subsequent calls to getToken will return from cache.
